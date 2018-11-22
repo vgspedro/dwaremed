@@ -1,0 +1,300 @@
+<div class="w3-row w3-padding-8 w3-white w3-xlarge">
+    <input id="set-patient-id" type="hidden">
+    <span  style="width:46px" class="w3-col w3-button w3-button-transparent w3-xlarge w3-text-blue" ontouchstart="templateLoader('appointment')">
+        <i class="fa fa-chevron-left"></i>
+    </span>
+    <div class="w3-rest w3-center w3-padding w3-large">
+        <span style="line-height: 33px;margin-left: -46px">Novo Paciente</span>
+    </div>
+</div>
+
+<div class="w3-padding-small w3-margin-top">
+    <div class="w3-white">
+        <div class="w3-col s2">&nbsp;</div>
+         <div class="w3-col s8 w3-margin-top w3-margin-bottom w3-border" id="set-image-user" onclick="cameraTakePicturePatient()">
+            <img class="w3-image w3-opacity-min" id="user-image" style="width:100%;min-height: 75px" src="img/no-user.jpg">
+         
+         </div>
+        <form class="w3-padding-small w3-row" id="new-pacient-form"> 
+            <label>Nome *</label>
+            <input type="text" placeholder="Nome *" id="name" class="w3-input w3-border w3-round needed" name="nome">
+            <div>&nbsp;<span class="required nome w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+
+            <label>Telemovel *</label>
+            <input type="number" placeholder="Telemovel *" id="mobile" class="w3-input w3-border w3-round needed" name="telemovel">
+            <div>&nbsp;<span class="required telemovel w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+
+            <label>Telefone</label>
+            <input type="number" placeholder="Telefone" class="w3-input w3-border w3-round" name="telefone">
+            <div>&nbsp;</div>
+
+            <label>Data Nascimento *</label>
+            <input type="date" format="dd/mm/yyyy" class="w3-input w3-border w3-round w3-white needed" name="data_nascimento">
+            <div>&nbsp;<span class="required data_nascimento w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+
+            <label>NIF *</label>
+            <input type="number" placeholder="xxxxxxxxx *" class="w3-input w3-border w3-round needed" name="nif">
+            <div>&nbsp;<span class="required nif w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+
+            <label>SNS</label>
+            <input type="number" placeholder="SNS" class="w3-input w3-border w3-round" name="sns">
+            <div>&nbsp;</div>
+
+            <label>Cartão Cidadão</label>
+            <input type="text" placeholder="Cartão Cidadão" class="w3-input w3-border w3-round" name="cartao_cidadao">
+            <div>&nbsp;</div>
+
+            <label>Sexo</label><br>
+            <div class="w3-col s6 w3-center">Masc. <input type="radio" value="M" class="w3-check" name="sexo"></div>
+            <div class="w3-col s6 w3-center">Femi. <input type="radio" value="F" class="w3-check" name="sexo"></div>
+            <div>&nbsp;</div>
+
+            <label>Morada *</label>
+            <input type="text" placeholder="Morada *" class="w3-input w3-border w3-round needed" name="morada">
+            <div>&nbsp;<span class="required morada w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+
+            <label>Código Postal *</label>
+            <div class="w3-row-padding">
+                <div class="w3-col s7" style="margin-left: -16px">
+                    <input type="number" placeholder="xxxx *" max="9999" class="w3-input w3-border w3-round needed" name="c_postal_4">
+                    <div>&nbsp;<span class="required c_postal_4 w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+                </div>
+                <div  class="w3-col s5">
+                    <input type="number" placeholder="xxx *" id="sub_postal" max="999"class="w3-input w3-border w3-round needed" name="c_postal_3" style="width:calc(100% + 32px)">
+                    <div style="margin-right: -32px">&nbsp;<span class="required c_postal_3 w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+                </div>
+            </div>
+
+            <label>Cidade *</label>
+            <input type="text" placeholder="Cidade *" class="w3-input w3-border w3-round needed" name="cidade">
+            <div>&nbsp;<span class="required cidade w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+
+            <label>Email *</label>
+            <input type="email" placeholder="Email *" class="w3-input w3-border w3-round needed" name="email_">
+            <div>&nbsp;<span class="required email_ w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+
+            <label>Nacionalidade *</label>
+            <select class="w3-input w3-border w3-round w3-white" name="nacionalidade">
+            </select>    
+            <div>&nbsp;</div>
+
+            <div class="w3-row w3-padding-16 w3-center w3-large">
+                <div class="w3-col s12">
+                    <span class="w3-left w3-border w3-round w3-button w3-block w3-grey w3-padding w3-light-grey w3-col" style="width:49%" onclick="templateLoader('appointment')"><i class="fa fa-times"></i> Fechar</span>
+                    <span class="w3-right w3-padding w3-border w3-block w3-round w3-button w3-green w3-col" style="width:49%" onclick="sendToServer()"><i class="fa fa-save"></i> Gravar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+var image_path = ''
+
+//PICTURE FROM CAMERA
+function cameraTakePicturePatient(){
+    navigator.camera.getPicture(onSuccess, onFail, { 
+        quality: 10,
+        destinationType: Camera.DestinationType.FILE_URL,
+        encodingType: Camera.EncodingType.JPEG
+    })
+}
+
+function onSuccess(imageURI) {
+    image_path = imageURI
+    $('#set-image-user').html('<img class="w3-image w3-opacity-min" id="user-image" style="width:100%;min-height: 75px" src="'+imageURI+'">')
+}
+
+function onFail(message) {
+    //alert('Failed because: ' + message)
+}
+
+function sendToServer(){
+
+    now = new Date()
+    month = now.getMonth()+1 > 9 ? String(now.getMonth()+1) : '0'+(now.getMonth()+1)
+    today = now.getFullYear()+'-'+month+'-'+now.getDate()
+
+    flag = false
+    err = []
+        
+    //$('.w3-overlay').show()
+    $('.required').addClass('w3-hide')
+
+    $('#new-pacient-form .needed').each(function() {
+        if(!$('input[name='+$( this ).attr( "name" )+']').val()){
+            $('.'+$( this ).attr( "name" )).removeClass('w3-hide')
+            err.push($( this ).attr( "name" ))
+        }
+    })
+    
+    /*required fields*/
+    if (err.length > 0){
+        $('.w3-overlay').hide()
+        //console.log(err)
+        $('html, body').animate({scrollTop: $('#new-pacient-form input[name='+err[0]+']').offset().top-95}, 750)
+    }
+
+    else {
+        if( $('input[name="data_nascimento"]').val() > today ){
+            $('.w3-overlay').hide()
+            $('#modal-text-info').html('A Data Inserida não é válida.<br>A data máxima é '+now.getDate()+'/'+month+'/'+now.getFullYear())
+            $('#modal-info').show()
+        }
+
+        else if( !validNif( $('input[name="nif"]').val() )) {
+            $('#modal-text-info').html('NIF Contribuinte Fiscal inválido.<br>Min: 9 digitos')
+            $('#modal-info').show()
+            $('html, body').animate({scrollTop: $('#new-pacient-form input[name=nif]').offset().top-95}, 750)
+            $('.nif').removeClass('w3-hide')
+        }
+
+        else if( !validPhone( $('input[name="telemovel"]').val() )) {
+            $('#modal-text-info').html('Telemovel inválido.<br>Min:9 digitos, Máx:14 digitos')
+            $('#modal-info').show()
+            $('html, body').animate({scrollTop: $('#new-pacient-form input[name=telemovel]').offset().top-95}, 750)
+            $('.telemovel').removeClass('w3-hide')
+        }
+
+        else if( !validEmail( $('input[name="email_"]').val() )) {
+            $('#modal-text-info').html('Email inválido.<br>')
+            $('#modal-info').show()
+            $('html, body').animate({scrollTop: $('#new-pacient-form input[name=email_]').offset().top-95}, 750)
+            $('.email_').removeClass('w3-hide')
+        }
+
+        else
+            flag = true
+    }
+
+    if (flag == true){
+
+        $('.w3-overlay').show()
+
+        //CHECK IF IMAGE IS IN PATH    
+        if (image_path)
+            imageURI = image_path
+        // NO IMAGE IN PATH SO WE CHECK THE PLATFORM (ANDROID OR IOS) AND ADD THE THIS IMAGE
+        else
+            imageURI = device.platform == 'Android' ? 'file://' + getPhoneGapPath() + '/img/no-user.jpg' : getPhoneGapPath() + '/img/no-user.jpg'
+
+        var options = new FileUploadOptions()
+        options.fileKey = "file"
+        options.fileName = imageURI.substr(imageURI.lastIndexOf('/') + 1)
+        options.mimeType = "image/jpeg"
+
+        d = $('input[name="data_nascimento"]').val().split('-')
+
+        var params = {}
+
+        params.action = 'new_patient'
+        params.user_id = localStorage.getItem('user_id')
+        params.clinic_id = localStorage.getItem('clinic_id')
+        params.paciente_action = 'create'
+        params.paciente_id = 0
+        params.entities_id = 0
+        params.groups_id = 0
+        params.paciente_comentario = ''
+        params.paciente_tags = ''
+        params.ref = ''
+        params.paciente_nif_pais = 'pt'
+        params.notificacao_fat_mail = 0
+        params.notificacao_sms_aniversario = 0
+        params.notificacao_sms_consulta = 0
+        params.notificacao_sms_lista_espera = 0
+
+        params.paciente_nome = $('input[name="nome"]').val()
+        params.paciente_telemovel = $('input[name="telemovel"]').val()
+        params.paciente_telefone = $('input[name="telefone"]').val()
+        params.paciente_dataNascimento = d[2]+'/'+d[1]+'/'+d[0]
+        params.paciente_nif = $('input[name="nif"]').val()
+        params.paciente_sns = $('input[name="sns"]').val()
+        params.paciente_cartao_cidadao = $('input[name="cartao_cidadao"]').val()
+        params.paciente_sexo = $('input[name="sexo"]').val()
+        params.paciente_morada = $('input[name="morada"]').val()
+        params.paciente_cod_postal = $('input[name="c_postal_4"]').val()
+        params.paciente_cod_postal2 = $('input[name="c_postal_3"]').val()
+        params.paciente_cidade = $('input[name="cidade"]').val()
+        params.paciente_email = $('input[name="email_"]').val().toLowerCase()
+        params.paciente_nacionalidade = $('select[name="nacionalidade"]').val()
+
+        setTimeout(function(){
+
+            options.params = params
+            options.chunkedMode = false
+            var ft = new FileTransfer()
+
+            ft.upload(imageURI, url, function(result){
+
+                $('.w3-overlay').hide()
+
+                if(result.response){
+                    a = []
+                    a = JSON.parse(result.response)
+
+                    if(a.status == 0){ 
+                        $('#modal-text-info').html(a.message)
+                        $('#modal-info').show()
+                    }
+                    else{
+                        $('#modal-text-success').html('Paciente <b>'+$('input[name="nome"]').val()+'</b> foi criado com sucesso.')
+                        $('#set-image-user').html('<img class="w3-image w3-opacity-min" id="user-image" style="width:100%;min-height: 75px" src="img/no-user.jpg">')
+                        $('#new-pacient-form').trigger('reset')
+                        $('#modal-success').show()
+                        initializeNewPacientFields()
+                    }
+                }
+            }, function(error){
+                //alert('error : ' + JSON.stringify(error))
+                $('.w3-overlay').hide()
+                $('#modal-error').show()
+            }, options)
+
+        }, 500)
+    }
+} 
+
+function getPhoneGapPath() {
+    var path = window.location.pathname
+    path = path.substr( path, path.length - 10 )
+    return path
+}
+
+var validNif = function(n) {
+    var patt = new RegExp('^[0-9]{9,12}$')
+    var res = patt.test(n)
+    return res
+}
+
+var validPhone = function(n) {
+    var patt = new RegExp('^[+]?[0-9]{9,14}$')
+    var res = patt.test(n)
+    return res
+}
+
+var validEmail = function(mail) {
+     var res = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+    return res.test(String(mail).toLowerCase())
+}
+
+    $(function() {
+        initializeNewPacientFields()
+    })
+
+    function initializeNewPacientFields(){
+
+        var nationality =''
+
+        now = new Date()
+        month = now.getMonth()+1 > 9 ? String(now.getMonth()+1) : '0'+(now.getMonth()+1)
+        today = now.getFullYear()+'-'+month+'-'+now.getDate()
+        $('#new-pacient-form input[name="data_nascimento"]').val(today)
+
+        for(c = 0; c <countries.length; c++)
+            nationality += countries[c].id == 171 ? ('<option selected value="'+countries[c].id+'">'+countries[c].name+'</option>') :('<option value="'+countries[c].id+'">'+countries[c].name+'</option>')
+
+        $('#new-pacient-form select[name="nacionalidade"]').html(nationality)
+
+    }
+</script>

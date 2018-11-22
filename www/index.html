@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    
+    <meta http-equiv="Content-Security-Policy" content="" />
+    
+    <link rel="stylesheet" href="css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="css/w3.css"> 
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <link rel="stylesheet" href="css/fullcalendar.min.css">
+    <link rel="stylesheet" href='css/fullcalendar.print.min.css'/>
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto">
+    <script type="text/javascript" src="js/status.json"></script>
+
+<body>
+
+<style>
+    html,body,h1,h2,h3,h4,h5,h6,p,a,div,span{font-family: "Roboto", sans-serif!important}
+</style>
+
+    <section class="w3-hide">
+<!-- 
+LOGIN
+-->
+        <div class="login_container w3-hide w3-large w3-light-grey mw100vh">
+            <div class="w3-section w3-display-topmiddle w3-center w3-padding">
+                <img class="w3-image logo-img" src="img/logo-ext.png">
+                <p class="w3-small w3-center">Médico</p>
+            </div>
+            <div class="w3-display-middle" style="width: 85%">
+                <form class="w3-padding-32" id="submit-form"> 
+                    <label>Email *</label>
+                    <input type="text" placeholder="Email *" class="w3-input w3-border w3-round" name="email">
+                    <label>Password *</label>
+                    <input type="password" placeholder="Password *" class="w3-input w3-border w3-round" name="password">
+                    <div class="w3-section">
+                        <p class="w3-center w3-text-blue w3-small" onclick="$('#modal-get-password').show()" href="recover">Esqueceu-se da Password?</p>
+                    </div>
+                    <div class="w3-row w3-padding-16 w3-center w3-large">
+                    <div class="w3-col s6 w3-hide">
+                        <span class="w3-round w3-button w3-block w3-grey w3-border w3-padding">Registar
+                        </span>
+                    </div>
+                    <div class="">
+                        <button id="submit" type="submit" class="w3-padding w3-block w3-round w3-button w3-border w3-blue">
+                        Login</button>
+                    </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+<!-- 
+END LOGIN
+-->
+
+<!-- 
+CLINIC CHOOSE
+-->
+
+        <div class="clinics_container w3-large w3-hide w3-light-grey mw100vh">
+            <div class="w3-section w3-display-topmiddle w3-center w3-padding" id="">
+                <img class="w3-image logo-img" src="img/logo.png" onclick="logout()">
+            </div>
+            <div class="w3-display-middle" style="width: 85%">
+                <div class="w3-center" style="text-align: center"><i class="w3-xlarge fa fa-hospital-o"></i> Selecione a Clinica</div>
+                    <form class="w3-xlarge w3-padding-32" id="clinic-form">
+                        <div class="w3-row" id="add-clinics">
+                        </div>
+                    </form>
+            </div>
+        </div>
+<!-- 
+!PAGE CONTENT! 
+-->
+        <div class="app_container w3-hide w3-white mw100vh">
+            <nav class="w3-sidebar w3-animate-left w3-blue w3-xlarge" id="mySidebar" style="z-index:9999;top: 0px">
+                <a href="javascript:void(0)"  onclick='$("#mySidebar").hide()' class="btn-close w3-button w3-blue w3-xxlarge w3-padding w3-display-topleft">
+                    <i class="fa fa-remove"></i>
+                </a>
+                <div class="w3-bar-block w3-center w3-text-white">
+                    <a href="#" class="w3-bar-item w3-button w3-padding-large" id='appointment' onclick='templateLoader(this.id)'>Agenda</a>
+                    <a href="#" class="w3-bar-item w3-button w3-padding-large" id='clientlist' onclick='templateLoader(this.id)'>Lista de Pacientes</a>
+                    <a href="#" class="w3-bar-item w3-button w3-padding-large" id='invoice' onclick='templateLoader(this.id)'>Comissões</a>
+                    <a href="#" class="w3-bar-item w3-button w3-padding-large" id='profile' onclick='templateLoader(this.id)'>Perfil</a>
+                </div>
+            </nav>
+
+            <nav class="w3-sidebar w3-animate-right w3-black w3-xlarge" id="mySide" style="z-index:9999;top: 0px">
+                <a href="javascript:void(0)"  onclick='$("#mySide").hide()' class="btn-close w3-button w3-black w3-xxlarge w3-padding w3-display-topright">
+                    <i class="fa fa-remove"></i>
+                </a>
+                <div class="w3-bar-block w3-center w3-text-white">
+                    <a href="#" class="w3-bar-item w3-button w3-padding-large" ontouchstart="seeClinics()"> Clinicas</a>
+                    <a href="#" class="w3-bar-item w3-button w3-padding-large" onclick="logout()"> Logout</a>
+                    <a href="#" class="w3-bar-item w3-button w3-padding-large" ontouchstart='navigator.app.exitApp()'> Sair</a>
+                </div>
+            </nav>
+
+            <div class="w3-card w3-top w3-white" style="z-index:3">
+                <span class="w3-button w3-button-transparent w3-xxlarge w3-text-blue" onclick='$("#mySidebar").show().addClass("w3-block")' style="margin-top:5px">
+                    <i class="fa fa-bars"></i>
+                </span>
+                <span class="w3-section w3-display-topmiddle w3-center" id="middle-function">
+                    <img class="w3-image logo-img" src="img/logo.png">
+                </span>
+                <span class="w3-button w3-button-transparent w3-right w3-xxlarge" onclick='$("#mySide").show().addClass("w3-block")'>
+                    <i style="padding: 9px 13px" class="fa fa-ellipsis-v"></i>
+                </span> 
+            </div>
+
+<!--INCLUDE FILES FROM LOAD METHOD-->
+
+            <div id="ajax_container" class="w3-light-grey" style="padding-top:72px;min-height:100vh"></div>
+
+        </div>
+
+    </section>
+
+<!-- LOADER -->
+
+    <div class="w3-overlay" style="z-index: 9999" onclick="$(this).hide()">
+        <div class="w3-display-middle w3-center">
+            <i class="w3-text-blue fa-4x fa fa-circle-o-notch fa-spin" style="margin-bottom:10px!important"></i>
+        </div>
+    </div>
+
+    <div class="menu-overlay"></div>
+
+<!-- SMALL ADD-->
+
+    <div id="small-pub" class="w3-opacity-min small-pub w3-animate-bottom">
+        <span class="w3-padding-small w3-right" onclick="$('#small-pub').hide()">
+            <i class="fa fa-remove"></i>
+        </span>
+        <div class="w3-row w3-center">
+            <div class="w3-col s3">
+                <span id="small-pub-header">
+            </div>
+            <div class="w3-col s7">
+                <b><span id="small-pub-text-left"></span>
+                </b>
+                <br>
+                <span class="w3-tiny" id="small-pub-text-right"></span>
+            </div>
+            <div class="w3-col s2 w3-right w3-xxlarge" id="small-pub-link">
+                <i class="fa fa-info-circle"></i>
+            </div>
+        </div>
+    </div>
+
+<!-- BIG ADD MODAL-->
+
+    <div id="big-pub" class="w3-modal" style="padding-top: 2.5%">
+        <div id="big-pub-img" class="w3-modal-content w3-card-4 w3-animate-top big-pub">
+            <span class="w3-padding-small w3-right" onclick="$('#big-pub').hide()">
+                <i class="fa fa-remove"></i>
+            </span>
+            <div class="w3-container w3-white">
+                <div class="w3-row">
+                    <span class="w3-col s10">
+                        <br><b><span id="big-pub-header"></span></b>
+                    </span>
+                    <span class="w3-col s2 w3-right w3-xxlarge" id="big-pub-link">
+                        <i class="fa fa-info-circle"></i>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- ERROR MODAL-->
+
+    <div id="modal-error" class="w3-modal" style="padding-top: 15%">
+        <div class="w3-modal-content w3-card-4 w3-animate-top w3-round" style="max-width: 450px">
+            <div class="w3-red w3-padding-large" style="border-top-left-radius: 4px; border-top-right-radius:4px">
+                <span class="w3-xlarge">
+                    Erro!
+                </span>
+                <span class="w3-padding-small w3-right" onclick="$('#modal-error').hide()">
+                    <i class="w3-xlarge fa fa-remove"></i>
+                </span>
+            </div>
+            <div class="w3-container w3-round w3-white">
+                <div class="w3-row-padding w3-large">
+                    <div class="w3-col s10">
+                        <p id="modal-text-error">Verifique ligação wi-fi, e tente novamente.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- INFO MODAL-->
+
+    <div id="modal-info" class="w3-modal" style="padding-top: 15%">
+        <div class="w3-modal-content w3-card-4 w3-animate-top w3-round" style="max-width: 450px">
+            <div class="w3-amber w3-padding-large" style="border-top-left-radius: 4px; border-top-right-radius:4px">
+                <span class="w3-xlarge">
+                    Verifique
+                </span>
+                <span class="w3-padding-small w3-right" onclick="$('#modal-info').hide()">
+                    <i class="w3-xlarge fa fa-remove"></i>
+                </span>
+            </div>
+            <div class="w3-container w3-round w3-white">
+                <div class="w3-row-padding">
+                    <div class="w3-col s10 w3-large">
+                        <p id="modal-text-info"></p></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- SUCCESS MODAL-->
+
+    <div id="modal-success" class="w3-modal" style="padding-top: 15%">
+        <div class="w3-modal-content w3-card-4 w3-animate-top w3-round" style="max-width: 450px">
+            <div class="w3-green w3-padding-large" style="border-top-left-radius: 4px; border-top-right-radius:4px">
+                <span class="w3-xlarge">
+                    Sucesso
+                </span>
+                <span class="w3-padding-small w3-right" ontouchstart="$('#modal-success').hide()">
+                    <i class="w3-xlarge fa fa-remove"></i>
+                </span>
+            </div>
+            <div class="w3-container w3-round w3-white">
+                <div class="w3-row-padding">
+                    <div class="w3-col s10 w3-large">
+                        <p id="modal-text-success"></p></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- INFO PASSWORD-->
+
+    <div id="modal-get-password" class="w3-modal" style="padding-top: 15%">
+        <div class="w3-modal-content w3-card-4 w3-animate-top w3-round" style="max-width: 450px">
+            <div class="w3-blue w3-padding-large" style="border-top-left-radius: 4px; border-top-right-radius:4px">
+                <span class="w3-xlarge">
+                    Insira o seu email
+                </span>
+                <span class="w3-padding-small w3-right" ontouchstart="getPasswordClose()">
+                    <i class="w3-xlarge fa fa-remove"></i>
+                </span>
+            </div>
+            <form id="get-password">
+                <div class="w3-container w3-round w3-white">               
+                    <div class="w3-row-padding">
+                        <div class="w3-col s12 w3-large w3-margin-bottom w3-margin-top">
+                            <label>Email *</label>
+                            <input type="text" placeholder="Email *" class="w3-input w3-border w3-round" name="email">
+                        </div>
+                        <div class="w3-col s12 w3-large w3-margin-bottom">
+                            <span class="w3-col w3-left w3-block w3-round w3-button w3-border" ontouchstart="getPasswordClose()" style="width:49%"> Fechar</span>
+                            <button class="w3-col w3-right w3-block w3-round w3-button w3-border w3-green" style="width:49%"> Enviar</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+<!-- UPDATE PASSWORD-->
+
+    <div id="modal-update-password" class="w3-modal" style="padding-top: 15%">
+        <div class="w3-modal-content w3-card-4 w3-animate-top w3-round" style="max-width: 450px">
+            <div class="w3-blue w3-padding-large" style="border-top-left-radius: 4px; border-top-right-radius:4px">
+                <span class="w3-xlarge">
+                    <i class="fa fa-key"></i> Nova Password
+                </span>
+                <span class="w3-padding-small w3-right" onclick="$('#modal-update-password').hide();$('#pass-0, #pass-1, #pass-2').val('')">
+                    <i class="w3-xlarge fa fa-remove"></i>
+                </span>
+            </div>
+            <form id="set-password">
+                <div class="w3-container w3-round w3-white">               
+                    <div class="w3-row">
+
+                        <div class="w3-col s12 w3-large w3-margin-top">
+                            <label>Password Atual*</label>
+                            <input type="password" placeholder="Password Atual *" id="pass-0" class="w3-input w3-border w3-round" name="password_old">    
+                        </div>
+
+                        <div class="w3-col s12 w3-large w3-margin-top">
+                            <label>Nova Password *</label>
+                            <input type="password" placeholder="Nova Password *" id="pass-1" class="w3-input w3-border w3-round" name="password_new">    
+                        </div>
+                        <div class="w3-col s12 w3-large w3-margin-bottom w3-margin-top">
+                            <label>Repetir Nova Password *</label>
+                            <input type="password" placeholder="Repetir Nova Password *" id="pass-2" class="w3-input w3-border w3-round" name="password_new_repeat">
+                        </div>
+
+                        <div class="w3-large w3-center no-match w3-hide w3-text-red w3-padding">As Passwords são diferentes</div>
+                        <div class="w3-large w3-center empty-password w3-hide w3-text-red w3-padding">Os campos Password estão vazios</div>
+
+                        <div class="w3-col s12 w3-large w3-margin-bottom">
+                            <span class="w3-col w3-left w3-padding w3-block w3-round w3-button w3-border" ontouchstart="$('#modal-update-password').hide(); $('#pass-0, #pass-1, #pass-2').val('')" style="width:49%"> Fechar</span>
+                            <span class="w3-col w3-right w3-block w3-round w3-button w3-border w3-green" onclick="updatePassword()" style="width:49%"> Enviar</span>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+
+
+    <div id="modal-client-appointment" class="w3-modal w3-light-grey" style="z-index:2;min-height:100vh;padding-top:72px">
+        <div class="w3-modal-content w3-light-grey" style="width:100%;margin:0px!important">
+            <div class="w3-row w3-padding-8 w3-white w3-xlarge">
+                <span  style="width:46px" class="w3-col w3-button w3-button-transparent w3-xlarge w3-text-blue" onclick="$('#modal-client-appointment').hide();; $('.is-waiting-list').addClass('w3-hide')">
+                    <i class="fa fa-chevron-left"></i>
+                </span>
+                <div class="w3-rest w3-center w3-padding w3-large">
+                    <span style="line-height: 33px;margin-left: -46px">Consulta</span>
+                </div>
+            </div>
+            <div class="w3-padding-small w3-margin-top w3-row-padding">
+                <div class="w3-col s12 w3-large w3-margin-bottom set_border_status"></div>
+                <form id="update-client-appointment">
+                    <input type="hidden" class="appointment_id" name="appointment_id">
+                    <input type="hidden" class="set_date" name="data">
+                    <div class="w3-white">         
+                        <div class="w3-row-padding">
+                            <div class="w3-col s12 w3-large w3-margin-bottom">
+                                <span class="w3-col s6 w3-text-red w3-large set_date w3-padding"></span>
+                                <span class="w3-col s6 w3-block w3-round w3-button w3-border w3-blue show_client_data"><i class="fa fa-vcard"></i> Paciente</span>
+                            </div>
+                            <div class="w3-col s6 w3-large w3-text-blue-gray w3-padding-16">
+                                <label>Paciente</label><br>
+                                <span class="patient_name"></span>
+                            </div>
+                            <div class="w3-col s6 w3-large w3-text-blue-gray w3-padding-16">
+                                <label>Médico</label><br>
+                                <span class="set-user-name"></span>
+                            </div>
+                            <div class="w3-col s12 w3-large w3-margin-top">
+                            <label>Tratamento</label><br>
+                                <textarea disabled class="w3-light-grey w3-input w3-border w3-round set_treatment"></textarea>
+                                <div>&nbsp;</div>
+                            </div>
+                            <div class="w3-col s6 w3-large">
+                            <label>Inicio *</label>
+                               <input type="time" disabled class="w3-input w3-border w3-round starts_at needed w3-text-black w3-light-grey" name="starts_at">
+                               <div>&nbsp;<span class="required starts_at w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+                            </div>
+                            <div class="w3-col s6 w3-large">
+                            <label>Fim *</label>
+                               <input type="time" disabled class="w3-input w3-border w3-round ends_at needed w3-text-black w3-light-grey" name="ends_at">
+                               <div>&nbsp;<span class="required ends_at w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+                            </div>
+                            <div class="w3-col s12 w3-large">
+                            <label>Sala</label>
+                               <input type="text" disabled name="sala_info" class="w3-light-grey w3-input w3-border w3-round set_room_info" name="room_info">
+                               <div>&nbsp;</div>
+                            </div>
+                            <div class="w3-col s12 w3-large">
+                            <label>Estado Marcação</label>
+                               <select disabled class="w3-light-grey w3-input w3-border w3-round status_info" name="status_info"></select>
+                               <div>&nbsp;</div>
+                            </div>
+                            <div class="w3-col s12 w3-large">
+                            <label>Notas</label>
+                               <textarea disabled rows="4" class="w3-input w3-border w3-round notes_info w3-light-grey" name="notes_info"> </textarea>
+                               <div>&nbsp;</div>
+                            </div>
+                            
+                            <div class="is-waiting-list w3-hide">
+
+                                <div class="w3-col s12 w3-large">
+                                    <label>Prioridade</label>
+                                    <select id="prioridade" class="w3-input w3-border w3-round notes_info w3-light-grey">
+                                        <option value="1">Alta</option>
+                                        <option value="2">Média</option>
+                                        <option value="3">Baixa</option>
+                                    </select>
+                                   <div>&nbsp;</div>
+                                </div>
+
+                                <div class="w3-col s12 w3-large w3-padding-32">
+                                    <span class="w3-col s4 w3-block w3-round w3-button w3-border w3-light-gray" onclick="$('#modal-client-appointment').hide(); $('.is-waiting-list').addClass('w3-hide')"><i class="fa fa-times"></i> Fechar</span>
+                                    <span class="w3-col s4 w3-block w3-round w3-button w3-border w3-red" onclick="deleteWaitingList()"><i class="fa fa-trash"></i> Apagar</span>
+                                    <span class="w3-col s4 w3-block w3-round w3-button w3-border w3-green" onclick="changeWaitingListStatus()"><i class="fa fa-check"></i> Feito</span>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src='js/moment.min.js'></script>
+    <script type="text/javascript" src='js/theme-chooser.js'></script>
+    <script type="text/javascript" src="js/fullcalendar.min.js"></script>
+    <script type="text/javascript" src='js/locale-all.js'></script>
+    <script type="text/javascript" src="js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+    <script type="text/javascript">
+        app.initialize()
+
+//ads = '0'
+//session = '1'
+
+    appointmentData = []
+
+    url="https://doctusware.pt/app/api/test.php";
+
+    setTimeout(function(){ 
+        $('section').removeClass('w3-hide').addClass('w3-animate-opacity') 
+    }, 1500)
+
+//LOGIN REQUEST IF SUCCESS GET CLINICS AND FILIALS
+$('#submit-form').on('submit',function(e){
+    e.preventDefault()
+    $('.w3-overlay').show()
+    setTimeout(function(){
+    $.ajax({  
+        url: url,      
+        type: "GET",
+        data:$('#submit-form').serialize()+'&action=login',
+        dataType: 'json',
+        success: function(data){
+            //console.log(data)
+            $('.w3-overlay').hide()
+
+            if (data.status == '1'){
+
+                localStorage.setItem('ads', data.data.sponsor_adds)
+                // set the user id
+                localStorage.setItem('user_id', data.data.user_id)
+                // set the user name
+                localStorage.setItem('user_name', data.data.user_name)
+
+                // SET USER SPECIALITY ID   
+                localStorage.setItem('speciality_id', data.data.speciality_id)
+                // SET USER SPECIALITY NAME 
+                localStorage.setItem('speciality', data.data.speciality)
+
+                // set the user schedule time
+                schedule = '00:10:00';
+
+                setScheduler = schedule.split(":")
+    
+                localStorage.setItem('user_schedule', hoursMinutesToSeconds(setScheduler[0]+':'+setScheduler[1]))
+
+                // set all clinics array
+                localStorage.setItem('clinics', JSON.stringify(data.data.clinic))
+
+
+                $('.set-user-name').text(localStorage.getItem('user_name'))
+                $('.login_container').addClass('w3-hide').removeClass('mw100vh')
+                obj =''
+                for(c in data.data.clinic)
+                    obj+= '<div class="w3-col w3-button w3-padding s12 w3-border w3-round w3-margin-bottom" onclick="clinicChoosen('+data.data.clinic[c].clinic_id+', \''+data.data.clinic[c].clinic_name+'\')"><div class="w3-col s11" style="text-align: left">'+data.data.clinic[c].clinic_name+'</div><div class="w3-col s1"><i class="fa fa-chevron-right"></i></div></div>'
+                $('#add-clinics').html(obj)
+                
+                $('.clinics_container').removeClass('w3-hide')
+
+            }
+
+            else if(data.status == '0'){
+                $('#modal-info').show()
+                $('#modal-text-info').text(data.message)
+            }
+         },
+        error:function(data){
+            //console.log(data)
+            $('.w3-overlay').hide()
+            $('#modal-error').show()
+        }
+    })
+    }, 500)
+})
+
+/**
+*on logout set all local storage vars to 0
+**/
+
+function logout(){
+    $("#mySide").hide()
+    //clear all storage vars
+    localStorage.setItem('ads', 0)
+    localStorage.setItem('user_id', 0)
+    localStorage.setItem('user_name', 0)
+    localStorage.setItem('clinic_id', 0)
+    localStorage.setItem('speciality_id', 0)
+    localStorage.setItem('speciality_name', 0)
+    localStorage.setItem('clinic_name', 0)
+    localStorage.setItem('clinics', 0)
+    localStorage.setItem('user_schedule', 0)
+    $('.login_container').removeClass('w3-hide').addClass('mw100vh')
+    $('.app_container').addClass('w3-hide')
+    //finally quit app
+    navigator.app.exitApp()
+}
+
+/**
+*on exit set all local storage vars to 0
+**/
+
+//USER REQUEST NEW PASSWORD FROM HIS EMAIL
+$('#get-password').on('submit',function(e){
+    $('#modal-get-password').hide()
+    e.preventDefault()
+    $('.w3-overlay').show()
+    //console.log($('#get-password').serialize())
+    setTimeout(function(){
+    $.ajax({  
+        url: url,      
+        type: "GET",
+        data:$('#get-password').serialize()+'&action=pass_recovery',
+        dataType: 'json',
+        success: function(data){
+            //console.log(data)
+            $('.w3-overlay').hide()
+            if (data.status == '1'){
+                $('#modal-success').show()
+                $('#modal-text-success').text(data.message)
+            }
+            else if(data.status == '0'){
+                $('#modal-info').show()
+                $('#modal-text-info').text(data.message)
+            }
+         },
+        error:function(data){
+           $('.w3-overlay').hide()
+           $('#modal-error').show()
+        }
+    })
+    }, 500)
+})
+
+
+//CLOSE AND CLEAR FORM NEW PASSWORD REQUEST
+function getPasswordClose(){
+    $('#modal-get-password').hide()
+    $('#get-password').trigger('reset')
+}
+
+function adsDisplay(ads,advertise){
+    
+    switch(localStorage.getItem('ads')){
+        case '0':
+            $('#big-pub, #small-pub').removeClass('w3-hide') 
+            setTimeout(function(){ 
+                $('#small-pub').show() 
+            }, 6000)
+            setTimeout(function(){ 
+                $('#small-pub').hide()
+                $('#big-pub').show()
+            }, 15000)
+
+            $('#small-pub-header').text(advertise[0].small.header)
+            $('#small-pub-text-left').text(advertise[0].small.text_left)
+            $('#small-pub-text-right').text(advertise[0].small.text_right)
+            $('#small-pub-link').attr('onclick','window.open(\''+advertise[0].small.link+'\', \'_system\')')
+            $('#small-pub').addClass(advertise[0].small.color).css('background-image','url('+advertise[0].small.image+')')
+            $('#big-pub-header').text(advertise[1].big.header)
+            $('#big-pub-link').attr('onclick','window.open(\''+advertise[1].big.link+'\', \'_system\')')
+            $('#big-pub-img').css('background-image','url('+advertise[1].big.image+')')
+        break
+        case '1':
+            $('#big-pub, #small-pub').addClass('w3-hide') 
+        break
+    }
+}
+
+
+
+function templateLoader(template,option){
+	if(option != 1)
+	{
+		pos.push(template)
+	}
+	
+    $('#modal-client-appointment').hide()
+    $('.is-waiting-list').addClass('w3-hide')
+    if(template == 'clientlist') 
+       $('#middle-function').html('<span style="margin-top: -16px" onclick="toogleClientList()" class="w3-button w3-text-gray w3-button-transparent w3-xxlarge"><i style="padding: 9px 13px" class="fa fa-search"></i></span>')
+
+    else if(template =='invoice')
+        $('#middle-function').html('<span style="margin-top: -16px" onclick="toogleInvoiceList()" class="w3-button w3-text-gray w3-button-transparent w3-xxlarge"><i style="padding: 9px 13px" class="fa fa-search"></i></span>')
+
+    else
+        $('#middle-function').html('<img class="w3-image logo-img" src="img/logo.png">')
+     
+    $.ajax({url: "files/"+template+".html"}).done(function( html ) {$('#ajax_container').html(html)})
+    $("#mySidebar").hide()
+}
+
+
+function templateShowClient(id){
+    $('#modal-client-appointment').hide()
+    $('.is-waiting-list').addClass('w3-hide')
+    $('.w3-overlay').show()
+    $.ajax({url: "files/showclient.html"}).done(function( html ) {
+        $('#ajax_container').html(html)
+        $("#set-patient-id").val(id)
+    })
+    $('#middle-function').html('<img class="w3-image logo-img" src="img/logo.png">')
+    $("#mySidebar").hide()
+}
+
+
+function secondsToHoursMinutes(d) {
+    d = Number(d)
+    var hours   = Math.floor(d/ 3600)
+    var minutes = Math.floor((d - (hours * 3600)) / 60)
+    if (hours < 10) hours = "0"+hours
+    if (minutes < 10) minutes = "0"+minutes
+    return hours+':'+minutes
+}
+
+function hoursMinutesToSeconds(hm) {
+
+    set = hm.split(':')
+    var h = set[0]*3600
+    var m = set[1]*60
+    t = parseInt(h) + parseInt(m)
+    return t
+}
+
+/*
+* show the current user his clinics from last login
+*/
+
+function seeClinics(){
+    // lets check if this storage has all the user current clinics name and id
+    var arr = JSON.parse(localStorage.getItem('clinics'))
+    
+    if (arr.length > 0) { 
+        obj =''
+        for(c = 0; c < arr.length; c++)
+            obj+= '<div class="w3-col w3-button w3-padding s12 w3-border w3-round w3-margin-bottom" onclick="clinicChoosen('+arr[c].clinic_id+', \''+arr[c].clinic_name+'\')"><div class="w3-col s11" style="text-align: left">'+arr[c].clinic_name+'</div><div class="w3-col s1"><i class="fa fa-chevron-right"></i></div></div>'
+        // add the layout to container 
+        $('#add-clinics').html(obj)
+        //show the current layout
+        $('.clinics_container').removeClass('w3-hide')
+        //hide the current layout
+        $('.app_container').addClass('w3-hide')
+        //hide the left nav bar
+        $('#mySide').hide()
+        //clear the ajax container, so in back event exitzs the app 
+        $('#ajax_container').empty()
+    }
+    else 
+        logout()
+}
+
+
+/*SET THE CURRENT DATABASE ACCORDING TO CLINIC ID */
+function clinicChoosen(clinic_id, clinic_name){
+    $('.w3-overlay').show()
+        setTimeout(function(){
+        $.ajax({  
+            url: url,      
+            type: "GET",
+            data:'clinic_id='+clinic_id+'&action=clinic_db',
+            dataType: 'json',
+            success: function(data){
+                //set current clinic_id in localstorage, to use in requests 
+                localStorage.setItem('clinic_id', clinic_id)
+                localStorage.setItem('clinic_name', clinic_name)
+                $('.w3-overlay').hide()
+                $('.clinics_container').addClass('w3-hide')
+                $('.app_container').removeClass('w3-hide')
+                templateLoader('appointment')
+                //set adds
+                adsDisplay(localStorage.getItem('ads'),advertise)
+            },
+            error:function(data){
+                //console.log(data)
+                $('.w3-overlay').hide()
+                $('#modal-error').show()
+            }
+        })
+    }, 500)
+}
+
+    /*update the appointment data*/
+    $('#update-client-appointment').on('submit', function(e){
+        
+        hours = false
+        minAllowed = parseInt(localStorage.getItem('user_schedule'))
+        e.preventDefault()
+        err=[]
+        $('.w3-overlay').show()
+        $('.required').addClass('w3-hide')
+
+        setTimeout(function(){
+
+            $('#update-client-appointment input.needed').each(function() {
+                if(!$('input[name='+$( this ).attr( "name" )+']').val()){
+                    $('.'+$( this ).attr( "name" )).removeClass('w3-hide')
+                    err.push($( this ).attr( "name" ))
+                }
+            })
+    
+            /*required fields*/
+            
+            if (err.length > 0)
+                $('.w3-overlay').hide()
+            /* dont allow start date smaller than end with the minAllowed (depends from each user) */
+            else {
+    
+                if(hoursMinutesToSeconds($('#update-client-appointment .starts_at').val()) + minAllowed > parseInt(hoursMinutesToSeconds($('#update-client-appointment .ends_at').val()))){
+                    $('.w3-overlay').hide()
+                    $('#modal-text-info').html('A hora inserida não é válida.<br>Os intervalos, entre Inicio e Fim, são de '+secondsToHoursMinutes(minAllowed))
+                    $('#modal-info').show()
+                }
+                else
+                    hours = true
+            }
+
+            if (hours == true){
+                //console.log('data to server on update appointment -->' + $('#update-client-appointment').serialize())
+                $.ajax({  
+                    url: url,      
+                    type: "GET",
+                    data:'action=add_patient&patient_id='+$("#set-patient-id").val()+'&clinic_id='+localStorage.getItem('clinic_id')+'&'+$('#update-client-appointment').serialize(),
+                    cache: false,
+                    //dataType: 'json',
+                    success: function(data){
+                        $('.w3-overlay').hide()
+                        //console.log('success on update appointment')    
+                    },
+                    error:function(data){
+                        $('.w3-overlay').hide()
+                        $('#modal-error').show()
+                    }
+                })
+            }
+        }, 500)
+    })
+
+//global var to set the user or patient image
+defineimage = ''
+
+
+function getPictureFromFile() {
+    defineimage = 'patientdataimage'
+    $('#image').trigger('click')
+
+/*
+    navigator.camera.getPicture(onSuccessImage, onFailImage, { 
+        quality: 40,
+        targetWidth: 1024,
+        targetHeight: 800, 
+        destinationType: Camera.DestinationType.FILE_URI,
+        sourceType:Camera.PictureSourceType.PHOTOLIBRARY,
+        encodingType: Camera.EncodingType.JPEG,
+        popoverOptions: CameraPopoverOptions
+    })*/
+}
+
+function cameraTakePicture(object) {
+    defineimage = object
+    /*only goto ppicture if edit is enabled*/
+    
+    defineimage == 'profile' && $('.edit-profile').hasClass('w3-hide') ? 
+        navigator.camera.getPicture(onSuccessImage, onFailImage, {  
+            quality: 40,
+            targetWidth: 1024,
+            targetHeight: 800, 
+            allowEdit : true,
+            destinationType: Camera.DestinationType.FILE_URI,
+            encodingType: Camera.EncodingType.JPEG,
+            popoverOptions: CameraPopoverOptions
+        })
+        :
+        navigator.camera.getPicture(onSuccessImage, onFailImage, {  
+            quality: 40,
+            targetWidth: 1024,
+            targetHeight: 800,
+            allowEdit : true,
+            encodingType: Camera.EncodingType.JPEG,
+            popoverOptions: CameraPopoverOptions,
+            destinationType: Camera.DestinationType.FILE_URI
+    })
+}
+
+function onSuccessImage(imageData) {
+
+    $('#send-'+defineimage).removeClass('w3-hide')
+    $('#set-image-user-'+defineimage).html('<img class="w3-image" id="'+defineimage+'-image" onerror="this.src=\'/images/no-user.jpg\'" style="width:100%;min-height: 75px">')
+    var output = document.getElementById(defineimage+'-image')
+    output.src = imageData
+
+}  
+
+function onFailImage(message) { 
+    //alert('Failed because: ' + message); 
+} 
+
+
+function user(user_idm, clinic_id){
+    $('.w3-overlay').show()
+        setTimeout(function(){
+        $.ajax({  
+            url: url,      
+            type: "GET",
+            data:'clinic_id='+id+'&action=clinic_db',
+            dataType: 'json',
+            success: function(data){
+                $('.w3-overlay').hide()
+                $('.clinics_container').addClass('w3-hide')
+                $('.app_container').removeClass('w3-hide')
+                //getMarcacoes()
+            },
+            error:function(data){
+                //console.log(data)
+                $('.w3-overlay').hide()
+                $('#modal-error').show()
+            }
+        })
+    }, 500)
+}
+
+    //verify if user has var stored if so no login, proceed to choose clinics
+    if(localStorage.getItem('user_id') > 0)
+    {
+        $('.set-user-name').text(localStorage.getItem('user_name'))
+        seeClinics()
+    }
+     else
+        logout()
+
+</script>
+
+</body>
+
+</html>
+
+
+
+
+

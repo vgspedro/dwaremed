@@ -1,0 +1,210 @@
+<style>
+table.dataTable tbody th, table.dataTable tbody td {
+    padding: 16px 8px!important
+}
+</style>
+
+
+<div class="w3-row w3-padding-8 w3-white w3-xlarge">
+  <!--input id="set-patient-id" type="hidden"-->
+  <span  style="width:46px" class="w3-col w3-button w3-button-transparent w3-xlarge w3-text-blue" ontouchstart="templateLoader('appointment')">
+    <i class="fa fa-chevron-left"></i>
+  </span>
+  <div class="w3-rest w3-center w3-padding w3-large">
+    <span style="line-height: 33px;margin-left: -46px"> Comissões <span class="set-clinic-name"></span></span>
+  </div>
+</div>
+
+<div class="w3-padding-small w3-padding-32">
+    <div class="w3-padding-large w3-large w3-row" style="background: #DFDFDF">  
+      <div class="w3-padding-small w3-col s12">
+        <div class="w3-col s7">Total Comissões</div>
+        <div class="w3-col s5 w3-text-green w3-right-align" id="invoices" style="font-weight: bold"></div>
+      </div>
+    </div>
+    <form id="get-invoices">
+      <div class="w3-row invoice-filters w3-hide">
+        <div class="w3-col s6 w3-padding-small">
+          <label>Inicio</label>
+          <input type="date" name="start" class="w3-input w3-round w3-border w3-white" placeholder="Data Inicio" onchange="validateDates(1, this.value)" format="dd/mm/yyyy">
+          <div class="start w3-hide">&nbsp;</div>
+        </div>
+        <div class="w3-col s6 w3-padding-small">
+          <label>Fim</label>
+          <input type="date" name="end" class="w3-input w3-round w3-white w3-border" placeholder="Data Fim" onchange="validateDates(2, this.value)"  format="dd/mm/yyyy">
+          <div class="end w3-hide">&nbsp;</div>
+        </div>
+        <div class="w3-right-align w3-padding-small w3-col w3-margin-bottom w3-large">
+          <span class="w3-button w3-round w3-blue w3-border" onclick="searchInvoices()">
+            <i class="fa fa-filter"></i> Pesquisar
+          </span>
+        </div>
+      </div>
+    </form>
+
+    <div class="w3-row">
+      <div class="w3-responsive">
+        <table id="dataTables" class="display nowrap table-hover table" style="width:100%; border-color:#FFF!important; border-spacing: 0px!important">
+          <thead class="w3-white" style="border-color:white!important">
+            <tr>
+              <th class="w3-padding-16 w3-left-align">Data</th>
+              <th class="w3-padding-16 w3-left-align">Fatura</th>
+              <th class="w3-padding-16 w3-right-align">Débito</th>
+              <th class="w3-padding-16 w3-right-align">Crédito</th>
+              <th class="w3-padding-16 w3-right-align">Saldo</th>
+            </tr>
+          </thead>
+          <tbody id="add-invoices">
+          </tbody>
+        </table>
+      </div>
+    </div>
+</div>
+
+<script>
+
+$('.w3-overlay').show()
+
+function validateDates(btn, vl){
+
+  var end = $('input[name="end"]').val() ? Number(new Date($('input[name="end"]').val()).getTime()) : 0
+  var start =  $('input[name="start"]').val() ? Number(new Date($('input[name="start"]').val()).getTime()) : 0
+
+  switch (btn){
+
+    //start date
+    case 1:
+      if (start > 0 && end > 0){
+        if (start > end){
+          $('#modal-info').show()
+          $('#modal-text-info').html('A data de Inicio tem que ser igual ou inferior à de Fim')
+          $('input[name="start"]').val($('input[name="end"]').val())
+        }
+      }
+    break
+
+    //end date
+    case 2:
+      if (start > 0 && end > 0){
+        if (start > end){
+          $('#modal-info').show()
+          $('#modal-text-info').html('A data de Fim tem que ser igual ou superior à de Inicio')
+          $('input[name="end"]').val($('input[name="start"]').val())
+        }
+      }
+    break
+  }
+}
+
+
+
+function setDatatable(){
+  $('#dataTables').DataTable({
+  "order": [[ 0, "asc" ]],
+  language: {
+    "lengthMenu": "Mostrar _MENU_",
+    "zeroRecords": '0 Resultados',
+    "info":"Mostrar página _PAGE_ de _PAGES_",
+    "infoEmpty": 'Sem resultados',
+    "search": 'Procurar',
+    "paginate": {
+      "previous": 'Anterior',
+      "next": 'Seguinte'
+      }
+    }
+  })
+}
+
+setDatatable()
+
+function searchInvoices(){
+
+  if ($('input[name="start"]').val() && $('input[name="end"]').val()){
+    $('.w3-overlay').show()
+    var obj = ''
+    setTimeout(function(){
+      $.ajax({  
+        url: url,      
+        type: "GET",
+        data:'action=search_invoices&clinic_id='+localStorage.getItem('clinic_id')+'&user_id='+localStorage.getItem('user_id')+'&start='+$('input[name="start"]').val()+'&end='+$('input[name="end"]').val(),
+        dataType: 'json',
+        
+        success: function(data){
+          //console.log(data)
+          $('.w3-overlay').hide()  
+          if (data.status == 0){
+            $('#modal-info').show()
+            $('#modal-text-info').html(data.message)
+          }
+          else{
+
+            $('#dataTables').DataTable().destroy()  
+            
+            for (u in data.data)
+              obj +='<tr><td>'+data.data[u].date+'</td><td class="pdf_fat" data-id=""><a>'+data.data[u].nr+'</a></td><td class="w3-right-align w3-text-red">'+data.data[u].deb+'</td><td class="w3-right-align w3-text-green">'+data.data[u].cred+'</td> <td class="w3-right-align">'+data.data[u].balance+'</td></tr>'
+            
+            $('#add-invoices').html(obj)
+          
+            $('#dataTables').DataTable({
+              "order": [[ 0, "asc" ]],
+              language: {
+                "lengthMenu": "Mostrar _MENU_",
+                "zeroRecords": '0 Resultados',
+                "info":"Mostrar página _PAGE_ de _PAGES_",
+                "infoEmpty": 'Sem resultados',
+                "search": 'Procurar',
+                "paginate": {
+                  "previous": 'Anterior',
+                  "next": 'Seguinte'
+                }
+              }
+            })
+          }
+        },
+        error:function(data){
+          $('.w3-overlay').hide()
+          $('#modal-error').show()
+        }
+      })
+    }, 500)
+  }
+  else{
+    $('#modal-info').show()
+    $('#modal-text-info').html('Insira uma data de Inicio e Fim')
+  }
+}
+
+
+
+
+
+
+function toogleInvoiceList(){
+  $('.invoice-filters').hasClass('w3-hide') ? 
+    $('.invoice-filters').removeClass('w3-hide') : $('.invoice-filters').addClass('w3-hide')
+}
+
+$('.set-clinic-name').text(localStorage.getItem('clinic_name'))
+
+function getInvoices(){
+  setTimeout(function(){
+    $.ajax({  
+      url: url,      
+      type: "GET",
+      data:'action=total_invoice&clinic_id='+localStorage.getItem('clinic_id')+'&user_id='+localStorage.getItem('user_id'),
+      dataType: 'json',
+      success: function(data){
+        $('.w3-overlay').hide()
+        $('#invoices').html(data.value+'€')
+      },
+      error:function(data){
+        $('.w3-overlay').hide()
+        $('#modal-error').show()
+      }
+    })
+  }, 500)
+}
+
+getInvoices()
+
+</script>

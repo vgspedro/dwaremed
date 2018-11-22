@@ -1,0 +1,349 @@
+    <div class="w3-row w3-padding-8 w3-white w3-xlarge">
+        <span  style="width:46px" class="w3-col w3-button w3-button-transparent w3-xlarge w3-text-blue" ontouchstart="templateLoader('appointment')">
+            <i class="fa fa-chevron-left"></i>
+        </span>
+        <div class="w3-rest w3-center w3-padding w3-large">
+            <span style="line-height: 33px;margin-left: -46px">Nova marcação</span>
+            <span class="w3-button w3-button-transparent w3-xxlarge" style="margin-top:-14px;position:absolute;right:0px" onclick="openModalSearchPatientNif()">
+                <i class="fa fa-search"></i>
+            </span>
+        </div>
+
+    </div>
+
+    <div class="w3-padding-small w3-margin-top">
+        <div class="w3-white">
+            <form class="w3-padding-small" id="new-appointment-form"> 
+                <input name="patient_id" type="hidden">
+                <div onclick="openModalSearchPatientNif()">
+                    <label>Paciente *</label>
+                    <input readonly type="text" placeholder="Nome" class="w3-input w3-border w3-light-grey w3-round needed" name="name">
+                    <div>&nbsp;<span class="required name w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+                </div>
+
+                <div onclick="openModalSearchPatientNif()">
+                    <label>Telemovel *</label>
+                    <input readonly type="text" placeholder="Telemovel" class="w3-input w3-light-grey w3-border w3-round needed" name="mobile">
+                    <div>&nbsp;<span class="required mobile w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+                </div>
+
+
+                <label>Especialista</label>
+                <select readonly class="w3-input w3-border w3-round w3-light-grey" name="especialista"></select>
+                <div>&nbsp;</div>
+
+                <label>Especialidade</label>
+                <select readonly class="w3-input w3-border w3-round w3-light-grey" name="especialidade"></select>
+                <div>&nbsp;</div>
+
+                <label>Tratamento</label>
+                <select class="w3-input w3-border w3-round w3-white" name="tratamento"></select>
+                <div>&nbsp;</div>
+
+                <label>Data *</label>
+                <input type="date" class="w3-input w3-border w3-round w3-white needed" name="data" onchange="onlyPresentAndFuture(this.value)">
+                <div>&nbsp;<span class="required data w3-text-red w3-hide">Obrigatório *</span></div>
+                
+                <div class="w3-col w3-left" style="width:49%">
+                    <label>Inicio *</label>
+                    <input type="time" class="w3-input w3-border w3-round needed w3-white" name="inicio" onchange="setTimeSchedule()">
+                    <div>&nbsp;<span class="required inicio w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+                </div>
+                <div class="w3-col w3-right" style="width:49%">
+                    <label>Fim *</label>
+                    <input type="time" class="w3-input w3-border w3-round needed w3-white" name="fim" onchange="setMinSchedule(this.value)">
+                    <div>&nbsp;<span class="required fim w3-text-red w3-hide w3-right">Obrigatório *</span></div>
+                </div>
+
+                <label>Descrição</label>
+                <textarea placeholder="Comentário sobre a consulta" rows="6" class="w3-input w3-border w3-round w3-white" name="descricao"></textarea>
+                <div>&nbsp;<span class="required descricao w3-text-red w3-hide">Obrigatório *</span></div>
+
+                <div class="w3-row w3-padding-16 w3-center w3-large">
+                    <div class="w3-col s12">
+                        <span class="w3-left w3-round w3-button w3-border w3-block w3-light-grey w3-padding w3-col" style="width:49%" ontouchstart="templateLoader('appointment')"><i class="fa fa-times"></i> Fechar</span>
+                        <button type="submit" class="w3-border w3-right w3-padding w3-block w3-round w3-button w3-green w3-col" style="width:49%"><i class="fa fa-save"></i> Gravar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<div id="modal-search-patient-nif" class="w3-modal w3-large" style="padding-top:5%;padding-bottom: 10%">
+    <div class="w3-modal-content w3-animate-right ">
+        <div class="w3-padding-large">
+            <span class="w3-large">
+                Insira o NIF do Paciente:
+            </span>
+            <span class="w3-padding-small w3-right" onclick="closeModalSearchPatientNif()">
+                <i class="w3-large fa fa-remove"></i>
+            </span>
+        </div>
+        <div class="w3-container w3-white w3-padding-large">
+            <input type="number" name="search_nif" class="w3-input w3-border w3-round" placeholder="Insira NIF do Paciente">
+            <div>&nbsp;<span class="required search_nif w3-center w3-text-red w3-hide"></span></div>
+            <span class="w3-right w3-padding w3-border w3-round w3-button w3-blue w3-col w3-margin-bottom" onclick="searchPatientByNif()"><i class="fa fa-search"></i> Procurar</span>
+        
+            <div class="w3-row nif-found"></div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+var validNif = function(n) {
+    var patt = new RegExp('^[0-9]{9,12}$')
+    var res = patt.test(n)
+    return res
+}
+
+function searchPatientByNif(){
+    $('.required').addClass('w3-hide')
+    $('.nif-found').empty()
+    if (!validNif( $('input[name="search_nif"]').val())){
+        
+        $('.search_nif').html('NIF Contribuinte Fiscal inválido.<br>Min: 9 digitos').removeClass('w3-hide')
+    }
+    else{
+        $('.w3-overlay').show()
+        setTimeout(function(){
+
+            $.ajax({
+                url: url,      
+                type: "GET",
+                data:'action=search_patient_nif&nif='+$('input[name="search_nif"]').val()+'&user_id='+localStorage.getItem('user_id')+'&clinic_id='+localStorage.getItem('clinic_id'),
+                dataType: 'json',
+                cache: false,
+                success: function(data){
+                    $('.w3-overlay').hide()
+                    if (data.status == 1){
+                        $('.nif-found').html('Foi encontrado o Paciente: </div><div class="w3-padding-small"><b>Nome:</b><br>'+data.data.name+'</div><div class="w3-padding-small"><b>Telemovel:</b><br>'+data.data.mobile+'</div><div class="w3-padding-small"><hr> Deseja preencher o formulário da consulta com os dados deste Paciente? </div><div class="w3-row w3-padding-16"><button onclick="closeModalSearchPatientNif()" class="w3-light-grey w3-button w3-left w3-border w3-round" w3-col" style="width:49%"><i class="fa fa-times"></i> Fechar</button><button w3-col" style="width:49%" onclick="fillForm(\''+data.data.id+'\',\''+data.data.name+'\', \''+data.data.mobile+'\')" class="w3-right w3-button w3-green w3-border w3-round"><i class="fa fa-check"></i> Sim</button></div>')
+                    }
+                    else{
+                        $('.nif-found').html('<span class="w3-large">'+data.message+'</span>')
+                    }
+                },
+                error:function(data){
+                    $('.w3-overlay').hide()
+                    $('#modal-error').show()
+                }
+            })
+
+
+
+
+        }, 500)
+    }
+}
+
+
+
+
+
+function fillForm(id,name,mobile){
+    $('input[name="patient_id"]').val(id)
+    $('input[name="name"]').val(name)
+    $('input[name="mobile"]').val(mobile)
+    closeModalSearchPatientNif()
+}
+
+
+function closeModalSearchPatientNif(){
+    $('.required').addClass('w3-hide')
+    $('.nif-found').empty()
+    $('#modal-search-patient-nif').hide()
+    $('input[name="search_nif"]').val('')
+}
+
+
+function openModalSearchPatientNif(){
+    $('.required').addClass('w3-hide')
+    $('.nif-found').empty()
+    $('#modal-search-patient-nif').show()
+}
+
+
+function getProductsList(){
+    $.ajax({
+        url: url,      
+        type: "GET",
+        data:'action=list_products&user_id='+localStorage.getItem('user_id')+'&clinic_id='+localStorage.getItem('clinic_id'),
+        dataType: 'json',
+        cache: false,
+        success: function(data){
+            if (data.status == 1){
+                tr = data.data
+                initializeNewAppoinmentFields()
+            }
+        },
+        error:function(data){
+            $('.w3-overlay').hide()
+            $('#modal-error').show()
+        }
+    })
+}
+
+tr = ''
+
+/*WHEN DOM READY
+
+1 - GET LIST OFR PRODUCTS
+2 - LIST PRODUCTS REQUEST OK  
+3 - INITIALIZE THE APPOINTMENT FORM 
+
+*/
+    $(function() {
+        $('.w3-overlay').show()
+        getProductsList()
+    })
+
+    /*Default values in form*/
+    function initializeNewAppoinmentFields(){ 
+
+        treatment = ''
+
+        now = new Date()   
+        
+        month = now.getMonth()+1 > 9 ? String(now.getMonth()+1) : '0'+(now.getMonth()+1)
+        $('#new-appointment-form input[name="data"]').val(now.getFullYear()+'-'+month+'-'+now.getDate())
+
+//        $('#new-appointment-form input[name="inicio"]').val(now.getHours()+':00')
+
+        minScheduler = localStorage.getItem('user_schedule')
+        minAllowed = parseInt(hoursMinutesToSeconds(now.getHours()+':00'))+parseInt(minScheduler)
+
+
+       $('#new-appointment-form input[name="inicio"]').val(secondsToHoursMinutes(minAllowed))
+
+        $('#new-appointment-form input[name="fim"]').val(secondsToHoursMinutes(minAllowed+(60*10)))
+        
+        $('#new-appointment-form select[name="especialidade"]').html('<option selected value="'+localStorage.getItem('speciality_id')+'">'+localStorage.getItem('speciality')+'</option>')
+
+        for(g in tr)
+            treatment += '<option data-id="'+tr[g].id+'" value="'+tr[g].ref+'">'+tr[g].name+'</option>'
+
+        $('#new-appointment-form select[name="tratamento"]').html(treatment)
+
+        $('#new-appointment-form select[name="especialista"]').html('<option selected value="'+localStorage.getItem('user_id')+'">Dr.'+localStorage.getItem('user_name')+'</option>')
+
+        if(appointmentData.length > 0) fillForm(appointmentData[0], appointmentData[1], appointmentData[2])
+
+        $('.w3-overlay').hide()
+
+        appointmentData = []
+
+    }
+
+    $('#new-appointment-form').on('submit', function(e){
+        
+        e.preventDefault()
+        var err = []
+        $('.w3-overlay').show()
+        $('.required').addClass('w3-hide')
+        
+        setTimeout(function(){
+    
+            $('#new-appointment-form .needed').each(function() {
+               if(!$('input[name='+$( this ).attr( "name" )+']').val()){
+                        $('.'+$( this ).attr( "name" )).removeClass('w3-hide')
+                        err.push($( this ).attr( "name" ))
+                    }
+            })
+
+            if(err.length>1){
+                $('.w3-overlay').hide()
+
+                $('html, body').animate({scrollTop: $('#new-appointment-form [name='+err[0]+']').offset().top-95}, 750)
+            }
+            else{
+                $.ajax({  
+                    url: url,      
+                    type: "POST",
+                    data: $('#new-appointment-form').serialize()+'&action=add_appointment&clinic_id='+localStorage.getItem('clinic_id')+'&user_id='+localStorage.getItem('user_id')+'&treatment_id='
+            +$('select[name="tratamento"] option:selected').data('id'),
+                    dataType: 'json',
+                    cache: false,
+                    success: function(data){
+                        $('.w3-overlay').hide()
+                        if (data.status == 1){
+                            $('#modal-success').show()
+                            $('#modal-text-success').html('Marcação foi efectuada com sucesso, com o registo #'+data.data)
+                            templateLoader('appointment')
+                        }
+                        else{
+                            //console.log(data)
+                            $('#modal-info').show()
+                            $('#modal-text-info').html(data.message)
+                        }
+                    },
+                    error:function(data){
+                       $('.w3-overlay').hide()
+                       $('#modal-error').show()
+                    }
+                })
+            }
+        }, 500)
+    })
+
+    //only today and forward alowed
+    function onlyPresentAndFuture(dt){
+        now = new Date()
+		month = now.getMonth()+1 > 9 ? String(now.getMonth()+1) : '0'+(now.getMonth()+1)
+		today = now.getFullYear()+'-'+month+'-'+now.getDate()
+        day = now.getDate() > 9 ? String(now.getDate()) : '0'+(now.getDate())
+		showToday = now.getFullYear()+'-'+month+'-'+day
+        
+        if(dt < showToday){
+            minAllowed = parseInt(hoursMinutesToSeconds(now.getHours()+':00'))+parseInt(minScheduler)
+            $('#new-appointment-form input[name="data"]').val(today)
+            $('#modal-info').show()
+            $('#modal-text-info').html('A data inserida não é válida.<br>A data minima é '+showToday)
+            $('#new-appointment-form input[name="inicio"]').val(now.getHours()+':00')
+            $('#new-appointment-form input[name="fim"]').val(secondsToHoursMinutes(minAllowed+(60*10)))
+
+        }
+        else
+            $('#new-appointment-form input[name="data"]').val(dt)
+    }
+
+    //hour only from day and equal or bigger than present
+    function setTimeSchedule(){
+
+        startsAt = $('#new-appointment-form input[name="inicio"]').val()
+        dt = $('#new-appointment-form input[name="data"]').val()
+        now = new Date()
+
+        month = now.getMonth()+1 > 9 ? String(now.getMonth()+1) : '0'+(now.getMonth()+1)
+        today = now.getFullYear()+'-'+month+'-'+now.getDate()
+        time =  startsAt.split(':')
+
+        if(dt <= today && now.getHours() > time[0] ){
+            minAllowed = parseInt(hoursMinutesToSeconds(now.getHours()+':00'))+parseInt(minScheduler)
+            $('#modal-info').show()
+            $('#modal-text-info').html('A hora inserida não é válida.<br>A hora minima é '+now.getHours()+':00')
+            $('#new-appointment-form input[name="inicio"]').val(now.getHours()+':00')
+            $('#new-appointment-form input[name="fim"]').val(secondsToHoursMinutes(minAllowed+(60*10)))
+        }
+        else {
+            startsAt = hoursMinutesToSeconds(startsAt);
+            $('#new-appointment-form input[name="fim"]').val(secondsToHoursMinutes(parseInt(startsAt) + parseInt(minScheduler))).focus()
+        }
+    }
+
+    function setMinSchedule(minTime){
+        now = new Date()
+        currentEndHour = hoursMinutesToSeconds(minTime)
+        hoursNow = hoursMinutesToSeconds(now.getHours()+':'+now.getMinutes())
+        currentStartHour = hoursMinutesToSeconds($('#new-appointment-form input[name="inicio"]').val())
+        minAllowed = parseInt(currentStartHour)+parseInt(minScheduler)
+
+        if( currentEndHour < minAllowed ){
+            $('#modal-info').show()
+            $('#modal-text-info').html('A hora inserida não é válida.<br>A hora minima é '+secondsToHoursMinutes(minAllowed))
+            $('#new-appointment-form input[name="fim"]').val(secondsToHoursMinutes(minAllowed+(60*10)))
+        }
+    }
+
+
+</script>
